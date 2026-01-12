@@ -73,6 +73,11 @@ list_containers() {
             ip=""
             if [ "$status" = "running" ]; then
                 ip=$(pct exec $vmid -- ip addr show eth0 2>/dev/null | grep 'inet ' | awk '{print $2}' | cut -d/ -f1 || echo "")
+                # Wait a bit more for IP if not found
+                if [ -z "$ip" ]; then
+                    sleep 3
+                    ip=$(pct exec $vmid -- ip addr show eth0 2>/dev/null | grep 'inet ' | awk '{print $2}' | cut -d/ -f1 || echo "")
+                fi
             fi
             
             # Check if from our template
@@ -105,7 +110,7 @@ create_container() {
 # Function to get IP address
 get_ip() {
     local vmid=$1
-    if [ "$(pct status $vmid --noheader)" = "running" ]; then
+    if [ "$(pct status $vmid | grep status | awk '{print $2}')" = "running" ]; then
         pct exec $vmid -- ip addr show eth0 2>/dev/null | grep 'inet ' | awk '{print $2}' | cut -d/ -f1
     fi
 }
@@ -143,7 +148,7 @@ show_info() {
     print_color $BLUE "Container Information"
     echo "====================="
     echo "VMID: $vmid"
-    echo "Status: $(pct status $vmid --noheader)"
+    echo "Status: $(pct status $vmid | grep status | awk '{print $2}')"
     echo "Hostname: $(pct config $vmid | grep hostname | cut -d' ' -f2)"
     echo "IP Address: ${ip:-N/A}"
     echo ""
@@ -153,7 +158,7 @@ show_info() {
     pct config $vmid
     echo ""
     
-    if [ "$(pct status $vmid --noheader)" = "running" ]; then
+    if [ "$(pct status $vmid | grep status | awk '{print $2}')" = "running" ]; then
         print_color $BLUE "Resource Usage"
         echo "==============="
         pct exec $vmid -- bash -c "echo 'Memory: '; free -h | grep '^Mem:' | awk '{print \$3 \"/\" \$2}'; echo 'Disk: '; df -h / | tail -1 | awk '{print \$3 \"/\" \$2 \" (\" \$5 \" used)\"}'"
@@ -196,7 +201,7 @@ update_container() {
     
     local vmid=$1
     
-    if [ "$(pct status $vmid --noheader)" != "running" ]; then
+    if [ "$(pct status $vmid | grep status | awk '{print $2}')" != "running" ]; then
         print_color $RED "Container $vmid must be running to update packages"
         exit 1
     fi
