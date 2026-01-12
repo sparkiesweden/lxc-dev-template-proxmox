@@ -1,0 +1,46 @@
+# Environment files
+.env
+.env.local
+.env.production
+
+# Backup files
+*.tar.gz
+*.zst
+*.backup
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
+
+# Custom scripts that might contain sensitive data
+custom-*.sh
+local-*.sh
+
+# Documentation build
+docs/build/
+
+# Node modules (if running scripts locally)
+node_modules/
+
+# Cache directories
+.cache/
+*.cache/
+
+# Editor backup files
+*~
+*.orig
+*.rej
