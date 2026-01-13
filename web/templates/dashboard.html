@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>DevContainer Monitor</title>
+    <meta name="description" content="Mobile-responsive LXC development container monitoring">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon.png') }}">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📱</span>
+                    <h1>DevContainer Monitor</h1>
+                </div>
+                <button id="refresh-btn" class="btn btn-primary" onclick="refreshContainers()">
+                    <span class="btn-text">🔄</span>
+                    <span class="btn-label">Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="status-bar">
+                <div id="connection-status" class="status-item">
+                    <span class="status-indicator offline"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+                <div id="container-count" class="status-item">
+                    <span class="status-number">0</span>
+                    <span class="status-label">Containers</span>
+                </div>
+            </div>
+
+            <section class="container-section">
+                <h2 class="section-title">Containers</h2>
+                <div id="containers-grid" class="container-grid">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading containers...</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="quick-actions" id="quick-actions">
+                <h2 class="section-title">Quick Actions</h2>
+                <div class="action-grid">
+                    <button class="action-btn" onclick="showCreateModal()">
+                        <span class="action-icon">➕</span>
+                        <span class="action-label">Create</span>
+                    </button>
+                    <button class="action-btn" onclick="showBackupModal()">
+                        <span class="action-icon">💾</span>
+                        <span class="action-label">Backup All</span>
+                    </button>
+                    <button class="action-btn" onclick="refreshContainers()">
+                        <span class="action-icon">🔄</span>
+                        <span class="action-label">Refresh</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Container Details Modal -->
+        <div id="container-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Container Details</h3>
+                    <button class="close-btn" onclick="closeModal('container-modal')">×</button>
+                </div>
+                <div class="modal-body">
+                    <div id="modal-container-info"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Container Modal -->
+        <div id="create-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create New Container</h3>
+                    <button class="close-btn" onclick="closeModal('create-modal')">×</button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-form" onsubmit="createContainer(event)">
+                        <div class="form-group">
+                            <label for="project-name">Project Name:</label>
+                            <input type="text" id="project-name" name="project_name" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="vmid">VMID (optional):</label>
+                            <input type="text" id="vmid" name="vmid" class="form-input" placeholder="Auto-assigned if empty">
+                        </div>
+                        <div class="form-group">
+                            <label for="template-type">Template:</label>
+                            <select id="template-type" name="template_type" class="form-select">
+                                <option value="default">Default</option>
+                                <option value="web">Web Development</option>
+                                <option value="api">Backend API</option>
+                                <option value="ml">Machine Learning</option>
+                                <option value="devops">DevOps</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">Create Container</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
