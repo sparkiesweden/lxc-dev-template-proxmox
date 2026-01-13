@@ -1,0 +1,300 @@
+{
+  "name": "DevContainer Manager",
+  "description": "Specialized agent for managing LXC development containers with OpenCode integration",
+  "version": "1.0.0",
+  "type": "devcontainer",
+  "capabilities": [
+    "container_management",
+    "opencode_configuration", 
+    "template_application",
+    "resource_monitoring",
+    "backup_operations"
+  ],
+  "tools": [
+    "pct",
+    "vzdump",
+    "docker",
+    "opencode",
+    "git"
+  ],
+  "endpoints": {
+    "list_containers": {
+      "method": "list",
+      "description": "List all development containers with status and IP",
+      "parameters": [],
+      "returns": {
+        "containers": "Array of container objects"
+      }
+    },
+    "create_container": {
+      "method": "create",
+      "description": "Create new development container from template",
+      "parameters": [
+        {
+          "name": "project_name",
+          "type": "string",
+          "required": true,
+          "description": "Name for the project/container"
+        },
+        {
+          "name": "vmid", 
+          "type": "string",
+          "required": false,
+          "description": "Specific VMID to use (auto-assigned if not provided)"
+        },
+        {
+          "name": "template_type",
+          "type": "string", 
+          "required": false,
+          "default": "default",
+          "description": "Project template to apply (web, api, ml, devops)"
+        }
+      ],
+      "returns": {
+        "success": "boolean",
+        "vmid": "string",
+        "project_name": "string", 
+        "ip": "string",
+        "access_methods": "array"
+      }
+    },
+    "configure_opencode": {
+      "method": "configure-opencode",
+      "description": "Configure OpenCode with providers and settings",
+      "parameters": [
+        {
+          "name": "vmid",
+          "type": "string",
+          "required": true,
+          "description": "Container VMID"
+        },
+        {
+          "name": "providers",
+          "type": "array",
+          "required": false,
+          "description": "List of providers to configure (anthropic, openai, etc.)"
+        }
+      ],
+      "returns": {
+        "success": "boolean",
+        "version": "string",
+        "error": "string"
+      }
+    },
+    "setup_project_template": {
+      "method": "setup-template", 
+      "description": "Apply project-specific template to container",
+      "parameters": [
+        {
+          "name": "vmid",
+          "type": "string",
+          "required": true,
+          "description": "Container VMID"
+        },
+        {
+          "name": "template_type",
+          "type": "string", 
+          "required": true,
+          "enum": ["web", "api", "ml", "devops"],
+          "description": "Type of project template to apply"
+        }
+      ],
+      "returns": {
+        "success": "boolean",
+        "template": "string",
+        "installed": "object"
+      }
+    },
+    "monitor_resources": {
+      "method": "monitor",
+      "description": "Get real-time resource usage for container",
+      "parameters": [
+        {
+          "name": "vmid", 
+          "type": "string",
+          "required": true,
+          "description": "Container VMID to monitor"
+        }
+      ],
+      "returns": {
+        "status": "string",
+        "cpu_usage": "string", 
+        "memory_info": "string",
+        "disk_info": "string"
+      }
+    },
+    "get_container_info": {
+      "method": "info",
+      "description": "Get detailed information about a container",
+      "parameters": [
+        {
+          "name": "vmid",
+          "type": "string", 
+          "required": true,
+          "description": "Container VMID"
+        }
+      ],
+      "returns": {
+        "vmid": "string",
+        "status": "string",
+        "ip": "string",
+        "config": "string",
+        "resources": "object"
+      }
+    },
+    "backup_container": {
+      "method": "backup",
+      "description": "Create backup snapshot of container",
+      "parameters": [
+        {
+          "name": "vmid",
+          "type": "string",
+          "required": true, 
+          "description": "Container VMID to backup"
+        }
+      ],
+      "returns": {
+        "success": "boolean",
+        "backup_name": "string",
+        "location": "string",
+        "error": "string"
+      }
+    }
+  },
+  "templates": {
+    "web": {
+      "name": "Web Development",
+      "description": "React, Vue, Angular development environment",
+      "packages": ["chromium", "lighttpd"],
+      "npm_packages": ["postman-cli"],
+      "ports": [3000, 5173, 4173],
+      "setup_commands": [
+        "npm create vite@latest",
+        "npm install",
+        "npm run dev"
+      ]
+    },
+    "api": {
+      "name": "Backend API",
+      "description": "REST API and microservices development",
+      "packages": ["postgresql-client", "redis-tools"],
+      "npm_packages": ["nodemon", "typescript"],
+      "services": ["postgres", "redis"],
+      "ports": [3000, 8080, 9229],
+      "setup_commands": [
+        "npm init -y",
+        "npm install express cors helmet",
+        "npm install -D nodemon typescript"
+      ]
+    },
+    "ml": {
+      "name": "Machine Learning",
+      "description": "AI/ML and data science environment", 
+      "packages": ["python3-torch", "python3-jupyter"],
+      "python_packages": ["scikit-learn", "pandas", "matplotlib"],
+      "ports": [8888],
+      "setup_commands": [
+        "pip install torch torchvision",
+        "jupyter lab --ip=0.0.0.0 --port=8888"
+      ]
+    },
+    "devops": {
+      "name": "DevOps & Infrastructure",
+      "description": "Infrastructure as code and DevOps tools",
+      "packages": ["terraform", "ansible", "kubectl"],
+      "services": ["docker-registry"],
+      "ports": [6443, 8080],
+      "setup_commands": [
+        "terraform init",
+        "terraform plan",
+        "kubectl get pods"
+      ]
+    }
+  },
+  "workflows": {
+    "quick_web_project": {
+      "description": "Create and setup a complete web development environment",
+      "steps": [
+        {
+          "action": "create_container",
+          "params": {
+            "project_name": "{{project_name}}",
+            "template_type": "web"
+          }
+        },
+        {
+          "action": "setup_project_template",
+          "params": {
+            "vmid": "{{vmid}}",
+            "template_type": "web"
+          }
+        },
+        {
+          "action": "configure_opencode",
+          "params": {
+            "vmid": "{{vmid}}",
+            "providers": ["anthropic"]
+          }
+        }
+      ]
+    },
+    "api_development": {
+      "description": "Setup API development with database services",
+      "steps": [
+        {
+          "action": "create_container", 
+          "params": {
+            "project_name": "{{project_name}}",
+            "template_type": "api"
+          }
+        },
+        {
+          "action": "setup_project_template",
+          "params": {
+            "vmid": "{{vmid}}",
+            "template_type": "api"
+          }
+        },
+        {
+          "action": "start_database_services",
+          "params": {
+            "vmid": "{{vmid}}"
+          }
+        }
+      ]
+    }
+  },
+  "integration": {
+    "opencode": {
+      "auto_configure": true,
+      "default_providers": ["anthropic", "openai"],
+      "models": ["anthropic/claude-3-5-sonnet-20241022"],
+      "workspace_integration": true
+    },
+    "proxmox": {
+      "api_version": ">=7.0",
+      "required_features": ["nesting", "keyctl"],
+      "storage_types": ["lvm", "zfs", "directory"]
+    },
+    "docker": {
+      "preinstalled": true,
+      "version": ">=29.0",
+      "compose_version": ">=5.0"
+    }
+  },
+  "monitoring": {
+    "metrics": [
+      "cpu_usage",
+      "memory_usage", 
+      "disk_usage",
+      "network_throughput",
+      "container_status"
+    ],
+    "alerts": {
+      "high_memory": {"threshold": 80, "unit": "percent"},
+      "high_cpu": {"threshold": 90, "unit": "percent"}, 
+      "disk_space": {"threshold": 85, "unit": "percent"},
+      "container_down": {"severity": "critical"}
+    }
+  }
+}
